@@ -1,9 +1,13 @@
+// routes/corsRoutes.js
 import express from "express";
-import { getStations, getStationsGeoJSON } from "../controllers/corsController.js";
+import { getAuthToken, getStations, getStationsFromSBC } from "../controllers/corsController.js";
+
+
 
 const router = express.Router();
 
-router.get("/", getStations);          // plain JSON
-router.get("/geojson", getStationsGeoJSON); // GeoJSON for ArcGIS
+router.get("/", getStations);  
+router.get("/realtime", getStationsFromSBC);       // GET 
 
 export default router;
+

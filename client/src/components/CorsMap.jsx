@@ -4,77 +4,94 @@ import MapView from "@arcgis/core/views/MapView";
 import Graphic from "@arcgis/core/Graphic";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import "@arcgis/core/assets/esri/themes/light/main.css";
+import axios from "axios";
 
 export default function CorsMap() {
   const mapDiv = useRef(null);
 
   useEffect(() => {
-    const map = new Map({
-      basemap: "osm" // simple basemap
-    });
+    const map = new Map({ basemap: "satellite" });
 
     const view = new MapView({
       container: mapDiv.current,
       map,
       center: [78.9629, 22.5937], // India center
       zoom: 5,
-      ui: { components: [] } // ❌ removes zoom, search, etc.
+      ui: { components: [] }, // hide zoom/search
     });
 
     const graphicsLayer = new GraphicsLayer();
     map.add(graphicsLayer);
+    const fetchStations = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/cors/realtime");
+        const data = res.data;
+        console.log(data.sites[0]);
+        graphicsLayer.removeAll();
 
-    // ✅ Dummy CORS stations
-    const dummyStations = [
-      { id: 1, name: "Delhi", latitude: 28.7041, longitude: 77.1025, status: "active" },
-      { id: 2, name: "Mumbai", latitude: 19.0760, longitude: 72.8777, status: "inactive" },
-      { id: 3, name: "Kolkata", latitude: 22.5726, longitude: 88.3639, status: "error" },
-      { id: 4, name: "Chennai", latitude: 13.0827, longitude: 80.2707, status: "active" },
-      { id: 5, name: "Bangalore", latitude: 12.9716, longitude: 77.5946, status: "active" }
-    ];
+        if (data.sites && Array.isArray(data.sites)) {
+          data.sites.forEach((st) => {
+            if (!st.longitude || !st.latitude) return;
 
-    // ✅ Add station markers with popups
-    dummyStations.forEach(st => {
-      const point = {
-        type: "point",
-        longitude: st.longitude,
-        latitude: st.latitude
-      };
+            const radToDeg = (rad) => rad * (180 / Math.PI);
 
-      // Symbol color based on status
-      let color = "green";
-      if (st.status === "inactive") color = "red";
-      if (st.status === "error") color = "orange";
+            const point = {
+              type: "point",
+              longitude: radToDeg(st.longitude),
+              latitude: radToDeg(st.latitude),
+            };
 
-      const markerSymbol = {
-        type: "simple-marker",
-        color,
-        size: "12px",
-        outline: { color: "white", width: 1 }
-      };
+  
+            let color = "grey";
+            if (!st.connected && !st.receivingData && !st.started) {
+              color = "grey";
+            }
+            else if (st.connected && st.receivingData && st.started) {
+              color = "green";
+            }
+            else if (st.connected && st.started && !st.receivingData) {
+              color = "red";
+            }
+            const markerSymbol = {
+              type: "simple-marker",
+              color,
+              size: "12px",
+              outline: { color: "white", width: 1 },
+            };
 
-      // Popup template
-      const popupTemplate = {
-        title: st.name,
-        content: `
-          <b>Status:</b> ${st.status}<br/>
-          <b>Latitude:</b> ${st.latitude}<br/>
-          <b>Longitude:</b> ${st.longitude}
-        `
-      };
+            // Popup info
+            const popupTemplate = {
+              title: st.siteCode || `Station ${st.id}`,
+              content: `
+                <b>Name:</b> ${st.siteCode}<br/>
+                <b>Status:</b> ${st.connected ? "Online" : "Offline"}<br/>
+                <b>Latitude:</b> ${radToDeg(st.latitude)}<br/>
+                <b>Longitude:</b> ${radToDeg(st.longitude)}<br/>
+              `,
+            };
 
-      // Marker graphic
-      const pointGraphic = new Graphic({
-        geometry: point,
-        symbol: markerSymbol,
-        attributes: st,
-        popupTemplate
-      });
+            const pointGraphic = new Graphic({
+              geometry: point,
+              symbol: markerSymbol,
+              attributes: st,
+              popupTemplate,
+            });
 
-      graphicsLayer.add(pointGraphic);
-    });
+            graphicsLayer.add(pointGraphic);
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch stations:", err);
+      }
+    };
 
-    return () => view?.destroy();
+    fetchStations();
+    const interval = setInterval(fetchStations, 5000); // refresh every 15s
+
+    return () => {
+      clearInterval(interval);
+      view?.destroy();
+    };
   }, []);
 
   return (
