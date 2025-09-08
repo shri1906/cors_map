@@ -18,9 +18,9 @@ app.use("/api/cors", corsRoutes);
 sequelize
   .sync({ alter: true }) // { force: true } only if you want to drop & recreate tables
   .then(() => {
-    console.log("✅ MySQL connected & tables synced");
+    console.log("MySQL connected & tables synced");
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   })
-  .catch((err) => console.error("❌ DB connection failed:", err));
+  .catch((err) => console.error(" DB connection failed:", err));

@@ -52,6 +52,9 @@ export default function CorsMap() {
             else if (st.connected && st.started && !st.receivingData) {
               color = "red";
             }
+            else if (st.connected && !st.started && st.receivingData) {
+              color = "red";
+            }
             const markerSymbol = {
               type: "simple-marker",
               color,
@@ -95,9 +98,46 @@ export default function CorsMap() {
   }, []);
 
   return (
-    <div
-      ref={mapDiv}
-      style={{ width: "100%", height: "90vh", border: "1px solid #ccc" }}
-    />
+    <div style={{ position: "relative", width: "100%", height: "90vh" }}>
+      {/* Map container */}
+      <div
+        ref={mapDiv}
+        style={{ width: "100%", height: "100%", border: "1px solid #ccc" }}
+      />
+
+      {/* ✅ Custom Legend */}
+      <div
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          background: "white",
+          padding: "10px 15px",
+          borderRadius: "8px",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+          fontSize: "14px",
+        }}
+      >
+        <div style={{ marginBottom: "6px", fontWeight: "bold" }}>
+          📍 Station Status
+        </div>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "green", display: "inline-block", marginRight: 8 }} />
+          Online
+        </div>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "red", display: "inline-block", marginRight: 8 }} />
+          Offline
+        </div>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
+          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "orange", display: "inline-block", marginRight: 8 }} />
+          Not Receiving
+        </div>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "grey", display: "inline-block", marginRight: 8 }} />
+          Unknown
+        </div>
+      </div>
+    </div>
   );
 }

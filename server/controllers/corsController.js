@@ -1,15 +1,13 @@
-import fs from "fs";
-import path from "path";
 import axios from "axios";
-
 
 export const getAuthToken = async () => {
   try {
     const userName = process.env.SBC_USER;
     const password = process.env.SBC_PASS;
+    const returnUrl = process.env.SBC_LOGIN_API;
 
     const loginResponse = await axios.post(
-      "http://103.206.29.4/SBC/API/login",
+      returnUrl,
       {
         userName: userName,
         password: password,
@@ -32,15 +30,16 @@ export const getAuthToken = async () => {
   }
 };
 
-// 🔹 Fetch stations directly from SBC API
+//  Fetch stations directly from SBC API
 export const getStationsFromSBC = async (req, res) => {
+  const getStationsUrl = process.env.SBC_GET_STATIONS_API;
   try {
     const token = await getAuthToken();
     if (!token) {
       return res.status(401).json({ error: "Failed to authenticate with SBC" });
     }
 
-    const response = await axios.get("http://103.206.29.4/SBC/API/sites", {
+    const response = await axios.get(getStationsUrl, {
       headers: {
         Accept: "application/json",
         "X-SBC-Auth": token, // only token string
@@ -49,7 +48,7 @@ export const getStationsFromSBC = async (req, res) => {
 
     res.json(response.data);
   } catch (error) {
-    console.error("❌ Error fetching SBC stations:", error.message);
+    console.error(" Error fetching SBC stations:", error.message);
     if (error.response) {
       console.error("Response:", error.response.data);
     }
@@ -57,17 +56,3 @@ export const getStationsFromSBC = async (req, res) => {
   }
 };
 
-// 🔹 Return plain JSON from local file
-export const getStations = async (req, res) => {
-  try {
-    const filePath = path.join(process.cwd(), "utils", "region2.json");
-    fs.readFile(filePath, "utf-8", (err, data) => {
-      if (err) {
-        return res.status(500).json({ error: "Failed to read region2.json" });
-      }
-      res.json(JSON.parse(data));
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
