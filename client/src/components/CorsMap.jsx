@@ -10,7 +10,7 @@ export default function CorsMap() {
   const mapDiv = useRef(null);
 
   useEffect(() => {
-    const map = new Map({ basemap: "satellite" });
+    const map = new Map({ basemap: "osm" });
 
     const view = new MapView({
       container: mapDiv.current,
@@ -42,18 +42,15 @@ export default function CorsMap() {
             };
 
   
-            let color = "grey";
-            if (!st.connected && !st.receivingData && !st.started) {
-              color = "grey";
-            }
-            else if (st.connected && st.receivingData && st.started) {
+            let color = "red";
+            if (st.connected && st.receivingData && st.started) {
               color = "green";
             }
             else if (st.connected && st.started && !st.receivingData) {
               color = "red";
             }
             else if (st.connected && !st.started && st.receivingData) {
-              color = "red";
+              color = "yellow";
             }
             const markerSymbol = {
               type: "simple-marker",
@@ -131,11 +128,7 @@ export default function CorsMap() {
         </div>
         <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
           <span style={{ width: 12, height: 12, borderRadius: "50%", background: "orange", display: "inline-block", marginRight: 8 }} />
-          Not Receiving
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "grey", display: "inline-block", marginRight: 8 }} />
-          Unknown
+          Data Not Receiving
         </div>
       </div>
     </div>
