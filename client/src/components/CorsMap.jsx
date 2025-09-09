@@ -42,7 +42,7 @@ export default function CorsMap() {
             };
 
   
-            let color = "red";
+            let color = "light grey"; // default
             if (st.connected && st.receivingData && st.started) {
               color = "green";
             }

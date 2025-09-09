@@ -1,9 +1,9 @@
 // routes/corsRoutes.js
 import express from "express";
-import {  getStationsFromSBC } from "../controllers/corsController.js";
+import {  getAllStations, } from "../controllers/corsController.js";
 
 const router = express.Router();
-router.get("/realtime", getStationsFromSBC);       // GET 
+router.get("/realtime", getAllStations);       // GET 
 
 export default router;
 
