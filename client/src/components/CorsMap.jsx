@@ -5,68 +5,70 @@ import Graphic from "@arcgis/core/Graphic";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 import axios from "axios";
+import "./corsMap.css"; 
 
 export default function CorsMap() {
   const mapDiv = useRef(null);
 
   useEffect(() => {
-    const map = new Map({ basemap: "osm" });
+    const map = new Map({ basemap: "topo-vector" });
 
     const view = new MapView({
       container: mapDiv.current,
       map,
       center: [78.9629, 22.5937], // India center
       zoom: 5,
-      ui: { components: [] }, // hide zoom/search
+      ui: { components: [] }, 
     });
 
     const graphicsLayer = new GraphicsLayer();
     map.add(graphicsLayer);
+
     const fetchStations = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/cors/realtime");
-        const data = res.data;
-        console.log(data.sites[0]);
+        const res = await axios.get("http://localhost:5000/api/cors/stations");
+        const stations = res.data;
         graphicsLayer.removeAll();
 
-        if (data.sites && Array.isArray(data.sites)) {
-          data.sites.forEach((st) => {
+        if (Array.isArray(stations)) {
+          stations.forEach((st) => {
             if (!st.longitude || !st.latitude) return;
-
-            const radToDeg = (rad) => rad * (180 / Math.PI);
 
             const point = {
               type: "point",
-              longitude: radToDeg(st.longitude),
-              latitude: radToDeg(st.latitude),
+              longitude: st.longitude,
+              latitude: st.latitude,
             };
+ 
+            let color = "lightgrey";
+            if (st.health === 1) color = "green";
+            else if (st.health === 3) color = "red";
+            else color = "orange";
 
-  
-            let color = "light grey"; // default
-            if (st.connected && st.receivingData && st.started) {
-              color = "green";
-            }
-            else if (st.connected && st.started && !st.receivingData) {
-              color = "red";
-            }
-            else if (st.connected && !st.started && st.receivingData) {
-              color = "yellow";
-            }
             const markerSymbol = {
               type: "simple-marker",
               color,
-              size: "12px",
+              size: "16px",
               outline: { color: "white", width: 1 },
             };
 
-            // Popup info
             const popupTemplate = {
-              title: st.siteCode || `Station ${st.id}`,
+              title: st.name || `Station ${st.code}`,
               content: `
-                <b>Name:</b> ${st.siteCode}<br/>
-                <b>Status:</b> ${st.connected ? "Online" : "Offline"}<br/>
-                <b>Latitude:</b> ${radToDeg(st.latitude)}<br/>
-                <b>Longitude:</b> ${radToDeg(st.longitude)}<br/>
+                <div class="custom-popup">
+                  <p><b>Code:</b> ${st.code}</p>
+                  <p><b>Source:</b> ${st.source}</p>
+                  <p><b>Status:</b> ${
+                    st.health === 1
+                      ? "🟢 Online"
+                      : st.health === 3
+                        ? "🔴 Offline"
+                        : "🟠 Connected, No Data"
+                  }</p>
+                  <p><b>Latitude:</b> ${st.latitude.toFixed(6)}</p>
+                  <p><b>Longitude:</b> ${st.longitude.toFixed(6)}</p>
+                  <p><b>Height:</b> ${st.height || "N/A"}</p>
+                </div>
               `,
             };
 
@@ -86,7 +88,7 @@ export default function CorsMap() {
     };
 
     fetchStations();
-    const interval = setInterval(fetchStations, 5000); // refresh every 15s
+    const interval = setInterval(fetchStations, 15000); // refresh every 15s
 
     return () => {
       clearInterval(interval);
@@ -102,7 +104,7 @@ export default function CorsMap() {
         style={{ width: "100%", height: "100%", border: "1px solid #ccc" }}
       />
 
-      {/* ✅ Custom Legend */}
+      {/* Custom Legend */}
       <div
         style={{
           position: "absolute",
@@ -118,17 +120,50 @@ export default function CorsMap() {
         <div style={{ marginBottom: "6px", fontWeight: "bold" }}>
           📍 Station Status
         </div>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
-          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "green", display: "inline-block", marginRight: 8 }} />
+        <div
+          style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}
+        >
+          <span
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "green",
+              display: "inline-block",
+              marginRight: 8,
+            }}
+          />
           Online
         </div>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
-          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "red", display: "inline-block", marginRight: 8 }} />
-          Offline
+        <div
+          style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}
+        >
+          <span
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "orange",
+              display: "inline-block",
+              marginRight: 8,
+            }}
+          />
+          Connected, No Data
         </div>
-        <div style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}>
-          <span style={{ width: 12, height: 12, borderRadius: "50%", background: "orange", display: "inline-block", marginRight: 8 }} />
-          Data Not Receiving
+        <div
+          style={{ display: "flex", alignItems: "center", marginBottom: "4px" }}
+        >
+          <span
+            style={{
+              width: 12,
+              height: 12,
+              borderRadius: "50%",
+              background: "red",
+              display: "inline-block",
+              marginRight: 8,
+            }}
+          />
+          Offline
         </div>
       </div>
     </div>

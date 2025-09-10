@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import sequelize from "./config/db.js";
 import corsRoutes from "./routes/corsRoutes.js";
+import { loadStationNames } from "./controllers/corsController.js"; // ✅ import loader
 
 dotenv.config();
 const app = express();
@@ -14,13 +15,20 @@ app.use(express.json());
 // Routes
 app.use("/api/cors", corsRoutes);
 
-// Start server after DB sync
-sequelize
-  .sync({ alter: true }) // { force: true } only if you want to drop & recreate tables
-  .then(() => {
+// Start server after DB sync & CSV load
+const startServer = async () => {
+  try {
+    await sequelize.sync({ alter: true });
     console.log("MySQL connected & tables synced");
+
+    await loadStationNames(); // ✅ load CSV once at startup
+
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
-  })
-  .catch((err) => console.error(" DB connection failed:", err));
+  } catch (err) {
+    console.error("❌ Startup failed:", err);
+  }
+};
+
+startServer();
