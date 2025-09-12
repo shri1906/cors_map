@@ -2,6 +2,7 @@
 .esri-popup__main-container {
   background: #1e1e2f !important;
   box-shadow: none !important;
+  width: auto !important;
 }
 
 /* Custom popup */

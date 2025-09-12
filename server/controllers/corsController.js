@@ -12,8 +12,7 @@ export const stationNameMap = {};
 export const loadStationNames = () => {
   return new Promise((resolve, reject) => {
     const csvPath = path.join(__dirname, "stations.csv");
-    console.log("📂 Loading CSV from:", csvPath);
-
+  
     fs.createReadStream(csvPath)
       .pipe(csv())
       .on("data", (row) => {
@@ -173,7 +172,7 @@ export const getAllStations = async (req, res) => {
       getStationsFromSBCInternal(),
       getStationsFromTrimbleInternal(),
     ]);
-    res.json([...sbcStations, ...trimbleStations]);
+    res.json([...sbcStations, ...trimbleStations]);  
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch stations" });
   }

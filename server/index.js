@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import sequelize from "./config/db.js";
 import corsRoutes from "./routes/corsRoutes.js";
-import { loadStationNames } from "./controllers/corsController.js"; // ✅ import loader
+import { loadStationNames } from "./controllers/corsController.js";
 
 dotenv.config();
 const app = express();
@@ -21,13 +21,13 @@ const startServer = async () => {
     await sequelize.sync({ alter: true });
     console.log("MySQL connected & tables synced");
 
-    await loadStationNames(); // ✅ load CSV once at startup
+    await loadStationNames(); 
 
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Startup failed:", err);
+    console.error("Startup failed:", err);
   }
 };
 

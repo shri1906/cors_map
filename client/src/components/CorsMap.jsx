@@ -3,9 +3,11 @@ import Map from "@arcgis/core/Map";
 import MapView from "@arcgis/core/views/MapView";
 import Graphic from "@arcgis/core/Graphic";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
+import GeoJSONLayer from "@arcgis/core/layers/GeoJSONLayer";
 import "@arcgis/core/assets/esri/themes/light/main.css";
 import axios from "axios";
-import "./corsMap.css"; 
+import Compass from "@arcgis/core/widgets/Compass";
+import "./corsMap.css";
 
 export default function CorsMap() {
   const mapDiv = useRef(null);
@@ -18,9 +20,28 @@ export default function CorsMap() {
       map,
       center: [78.9629, 22.5937], // India center
       zoom: 5,
-      ui: { components: [] }, 
+      ui: { components: [] },
     });
 
+    const compass = new Compass({
+      view,
+    });
+
+    view.ui.add(compass, "top-left");
+    const geojsonLayer = new GeoJSONLayer({
+      url: "/india.geojson",
+      renderer: {
+        type: "simple",
+        symbol: {
+          type: "simple-fill",
+          color: [0, 0, 0, 0],
+          outline: { color: "teal", width: 1.5 },
+        },
+      },
+    });
+    map.add(geojsonLayer);
+
+    // Station layer
     const graphicsLayer = new GraphicsLayer();
     map.add(graphicsLayer);
 
@@ -34,21 +55,21 @@ export default function CorsMap() {
           stations.forEach((st) => {
             if (!st.longitude || !st.latitude) return;
 
-            const point = {
-              type: "point",
-              longitude: st.longitude,
-              latitude: st.latitude,
-            };
- 
             let color = "lightgrey";
             if (st.health === 1) color = "green";
             else if (st.health === 3) color = "red";
             else color = "orange";
 
+            const point = {
+              type: "point",
+              longitude: st.longitude,
+              latitude: st.latitude,
+            };
+
             const markerSymbol = {
               type: "simple-marker",
               color,
-              size: "16px",
+              size: "12px",
               outline: { color: "white", width: 1 },
             };
 
@@ -88,7 +109,7 @@ export default function CorsMap() {
     };
 
     fetchStations();
-    const interval = setInterval(fetchStations, 15000); // refresh every 15s
+    const interval = setInterval(fetchStations, 15000);
 
     return () => {
       clearInterval(interval);
