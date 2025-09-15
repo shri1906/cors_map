@@ -13,7 +13,7 @@ export default function CorsMap() {
   const mapDiv = useRef(null);
 
   useEffect(() => {
-    const map = new Map({ basemap: "topo-vector" });
+    const map = new Map({ basemap: "osm" });
 
     const view = new MapView({
       container: mapDiv.current,
@@ -69,7 +69,7 @@ export default function CorsMap() {
             const markerSymbol = {
               type: "simple-marker",
               color,
-              size: "12px",
+              size: "14px",
               outline: { color: "white", width: 1 },
             };
 
@@ -118,24 +118,25 @@ export default function CorsMap() {
   }, []);
 
   return (
-    <div style={{ position: "relative", width: "100%", height: "90vh" }}>
+    <div style={{ position: "relative", width: "80%", height: "80vh" }}>
       {/* Map container */}
       <div
         ref={mapDiv}
-        style={{ width: "100%", height: "100%", border: "1px solid #ccc" }}
+        style={{ width: "100%", height: "100%", border: "2px solid #000" }}
       />
 
       {/* Custom Legend */}
       <div
         style={{
           position: "absolute",
-          top: "20px",
-          right: "20px",
+          top: "10px",
+          right: "10px",
           background: "white",
           padding: "10px 15px",
           borderRadius: "8px",
           boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
           fontSize: "14px",
+          width: "160px",
         }}
       >
         <div style={{ marginBottom: "6px", fontWeight: "bold" }}>

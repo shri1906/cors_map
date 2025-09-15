@@ -15,7 +15,7 @@ app.use(express.json());
 // Routes
 app.use("/api/cors", corsRoutes);
 
-// Start server after DB sync & CSV load
+
 const startServer = async () => {
   try {
     await sequelize.sync({ alter: true });
