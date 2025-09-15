@@ -13,7 +13,7 @@ export default function CorsMap() {
   const mapDiv = useRef(null);
 
   useEffect(() => {
-    const map = new Map({ basemap: "osm" });
+    const map = new Map({ basemap: "topo-vector" });
 
     const view = new MapView({
       container: mapDiv.current,
@@ -118,7 +118,7 @@ export default function CorsMap() {
   }, []);
 
   return (
-    <div style={{ position: "relative", width: "80%", height: "80vh" }}>
+    <div style={{ position: "relative", width: "100%", height: "100vh" }}>
       {/* Map container */}
       <div
         ref={mapDiv}
