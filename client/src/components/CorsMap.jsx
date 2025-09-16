@@ -88,7 +88,7 @@ export default function CorsMap() {
                   }</p>
                   <p><b>Latitude:</b> ${st.latitude.toFixed(6)}</p>
                   <p><b>Longitude:</b> ${st.longitude.toFixed(6)}</p>
-                  <p><b>Height:</b> ${st.height || "N/A"}</p>
+                  <p><b>Height:</b> ${st.height != null ? Number(st.height).toFixed(3) : "N/A"}</p>
                 </div>
               `,
             };
