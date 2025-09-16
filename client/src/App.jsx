@@ -4,7 +4,7 @@ import CorsMap from './components/CorsMap.jsx'
 function App() {
 
   return (
-     <div>
+     <div className="p-4">
       <CorsMap />
     </div>
   )
